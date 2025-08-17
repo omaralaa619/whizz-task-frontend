@@ -1,9 +1,45 @@
 "use client";
 import { LoaderCircle } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-const PostForm = ({ defaultValues, submitHandler, submitLoading }) => {
+const PostForm = ({
+  defaultValues,
+  submitHandler,
+  submitLoading,
+  tags,
+  setTags,
+}) => {
+  const [tagQuery, setTagQuery] = useState("");
+  const [tagLoading, setTagLoading] = useState(false);
+  const [tagResults, setTagResults] = useState([]);
+
+  useEffect(() => {
+    if (tagQuery.trim() === "") {
+      setTagResults([]);
+      return;
+    }
+
+    setTagLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/tags?q=${encodeURIComponent(tagQuery)}`
+        );
+        const data = await res.json();
+        console.log(data);
+
+        setTagResults(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setTagLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [tagQuery]);
+
   const { register, handleSubmit } = useForm({
     defaultValues: { ...defaultValues },
   });
@@ -47,7 +83,7 @@ const PostForm = ({ defaultValues, submitHandler, submitLoading }) => {
           onChange={handleImageChange}
           className="w-full border border-gray-300 rounded px-3 py-2 bg-transparent"
         />
-        {/* Display image: if preview (file picked), show preview; else if defaultValues.image is a string, show URL */}
+
         {imagePreview ? (
           <img
             src={imagePreview}
@@ -65,15 +101,65 @@ const PostForm = ({ defaultValues, submitHandler, submitLoading }) => {
           )
         )}
       </div>
+
+      {/* /////////////////////////////////////////////////////////////////////////////////////////////// */}
+
       <div>
-        <label className="block mb-2 font-medium">Tags (comma separated)</label>
+        <label className="block mb-2 font-medium">Tags</label>
         <input
           type="text"
-          {...register("tags")}
+          value={tagQuery}
+          onChange={(e) => setTagQuery(e.target.value)}
           className="w-full border border-gray-300 rounded px-3 py-2 bg-transparent"
-          placeholder="e.g. tech, blog, nextjs"
+          placeholder="Search for tags..."
         />
+
+        {tagLoading && <p className="text-gray-500">Loading...</p>}
+        {tagResults.length > 0 && (
+          <ul className="border rounded mt-4 bg-neutral-800  max-h-40 overflow-y-auto">
+            {tagResults.map((tag) => (
+              <li
+                key={tag.id}
+                className="px-3 py-1 hover:bg-neutral-700 cursor-pointer"
+                onClick={() => {
+                  setTagQuery("");
+                  setTags((prev) => {
+                    if (prev.some((t) => t.id === tag.id)) return prev;
+                    return [...prev, tag];
+                  });
+                  console.log(tags);
+                }}
+              >
+                {tag.name}
+              </li>
+            ))}
+          </ul>
+        )}
+        {tags.length > 0 && (
+          <div className="border p-2 rounded flex flex-wrap gap-2 mb-2 mt-4">
+            {tags.map((tag) => (
+              <div
+                key={tag.id}
+                className="flex items-center bg-neutral-800 px-3 py-1 rounded text-white relative"
+              >
+                <span>{tag.name}</span>
+                <button
+                  type="button"
+                  className="ml-2 text-xs text-gray-400 hover:text-red-400 font-bold px-1 rounded"
+                  onClick={() =>
+                    setTags((prev) => prev.filter((t) => t.id !== tag.id))
+                  }
+                  aria-label={`Remove ${tag.name}`}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+      {/* /////////////////////////////////////////////////////////////////////////////////////////////// */}
+
       <button
         type="submit"
         className="bg-blue-800 text-white py-2 rounded hover:bg-blue-900 transition-colors flex items-center justify-center"

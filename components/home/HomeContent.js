@@ -8,7 +8,7 @@ import axios from "axios";
 const HomeContent = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const tags = ["javascript", "tech", "rails"];
+
   const getTokenFromCookies = () => {
     const match = document.cookie.match(new RegExp("(^| )token=([^;]+)"));
     return match ? match[2] : null;
@@ -62,25 +62,19 @@ const HomeContent = () => {
           <>
             {posts[0] && (
               <div>
-                <LatestPost post={posts[0]} placement={true} tags={tags} />
+                <LatestPost post={posts[0]} placement={true} />
               </div>
             )}
             <div>
-              <PostList
-                posts={posts.length > 1 ? posts.slice(1, 4) : []}
-                tags={tags}
-              />
+              <PostList posts={posts.length > 1 ? posts.slice(1, 4) : []} />
             </div>
             {posts[4] && (
               <div>
-                <LatestPost post={posts[4]} placement={false} tags={tags} />
+                <LatestPost post={posts[4]} placement={false} />
               </div>
             )}
             <div>
-              <PostList
-                posts={posts.length > 4 ? posts.slice(4) : []}
-                tags={tags}
-              />
+              <PostList posts={posts.length > 4 ? posts.slice(4) : []} />
             </div>
           </>
         )}

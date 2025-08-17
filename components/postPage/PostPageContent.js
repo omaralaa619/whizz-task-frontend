@@ -8,7 +8,7 @@ import CommentSection from "./CommentSection";
 const PostPageContent = ({ id }) => {
   const [post, setPost] = useState([]);
   const [loading, setLoading] = useState(true);
-  const tags = ["javascript", "tech", "rails"];
+
   const getTokenFromCookies = () => {
     const match = document.cookie.match(new RegExp("(^| )token=([^;]+)"));
     return match ? match[2] : null;
@@ -60,14 +60,19 @@ const PostPageContent = ({ id }) => {
 
           <div className="flex justify-between mb-4">
             <div className="flex gap-2 text-sm">
-              {tags.map((tag, idx) => {
+              {post.tags.slice(0, 3).map((tag, idx) => {
                 const colors = [
                   "text-lime-500",
                   "text-cyan-500",
                   "text-yellow-500",
                 ];
-
-                return <Tag key={tag} tag={tag} color={colors[idx]} />;
+                return (
+                  <Tag
+                    key={tag}
+                    tag={tag}
+                    color={colors[idx % colors.length]}
+                  />
+                );
               })}
             </div>
 

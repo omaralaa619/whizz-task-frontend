@@ -9,6 +9,7 @@ const PostEdit = ({ id }) => {
   const [post, setPost] = useState({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tags, setTags] = useState([]);
   const getTokenFromCookies = () => {
     const match = document.cookie.match(new RegExp("(^| )token=([^;]+)"));
     return match ? match[2] : null;
@@ -25,6 +26,12 @@ const PostEdit = ({ id }) => {
     const formData = new FormData();
     formData.append("post[title]", data.title);
     formData.append("post[body]", data.body);
+
+    if (tags && tags.length > 0) {
+      tags.forEach((tag, idx) => {
+        formData.append(`post[tag_ids][]`, tag.id);
+      });
+    }
 
     if (data.image && data.image.length === 1 && data.image[0]) {
       formData.append("post[image]", data.image[0]);
@@ -64,6 +71,7 @@ const PostEdit = ({ id }) => {
         }
       );
       setPost(response.data);
+      setTags(response.data.tags);
       console.log(response.data);
     } catch (error) {
       console.log(error);
@@ -81,6 +89,8 @@ const PostEdit = ({ id }) => {
           defaultValues={post}
           submitLoading={submitLoading}
           submitHandler={submitHandler}
+          tags={tags}
+          setTags={setTags}
         />
       )}
     </div>
